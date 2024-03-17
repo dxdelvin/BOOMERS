@@ -57,14 +57,4 @@ To get started with Home Secure, follow these steps:
 4. Monitor your premises remotely using the live camera feed feature.
 5. Stay informed about security breaches and suspicious activities through SMS, WhatsApp, or email alerts.
 
-## Support
-
-For any inquiries or assistance regarding Home Secure, please contact our support team at [support@homesecure.com](mailto:support@homesecure.com).
-
-## License
-
-This project is licensed under the [MIT License](LICENSE). Feel free to modify and distribute it according to your needs.
-
-## Disclaimer
-
-While Home Secure aims to enhance the security of your premises, it is not a substitute for professional security services or vigilance. Always exercise caution and follow local laws and regulations regarding security measures and surveillance.
+Thankyou!
