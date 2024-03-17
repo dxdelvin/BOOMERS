@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    background-color: #f7f7f7;
+}
+
+.container {
+    display: flex; /* Use flexbox */
+    flex-direction: column; /* Stack elements vertically */
+    gap: 20px;
+    max-width: 800px;
+    width: 100%;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    position: relative;
+    justify-content: flex-start; /* Align items to the start */
+}
+
+/* Login form styles */
+.login {
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #007bff;
+    color: #fff;
+    width: 100%; /* Take full width */
+}
+
+.login h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #fff;
+}
+
+.form-group input {
+    width: 90%; /* Full width on mobile */
+        margin-top: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+}
+
+button[type="submit"] {
+    width: 90%; /* Full width on mobile */
+    background-color: #0056b3;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* Fingerprint section styles */
+.fingerprint {
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #f2f2f2;
+}
+
+.fingerprint h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+#emergencyBtn {
+    position: fixed;
+    bottom: 20px; /* Adjust distance from bottom */
+    right: 20px; /* Adjust distance from right */
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    z-index: 1000; /* Ensure the button stays on top */
+}
+#emergencyForm {
+    position: fixed;
+    bottom: 20px; /* Adjust distance from bottom */
+    right: 20px; /* Adjust distance from right */
+    z-index: 1000; /* Ensure the form stays on top */
+}
+
+#emergencyForm button[type="button"] {
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+
+
+/* Media query for tablet and larger screens */
+@media (min-width: 768px) {
+    .container {
+        flex-direction: row; /* Arrange elements in a row */
+        justify-content: center; /* Center elements horizontally */
+        align-items: center; /* Center elements vertically */
+    }
+
+    .login {
+        flex: 1; /* Let the login form take up available space */
+    }
+
+    .fingerprint {
+        flex: 1; /* Let the fingerprint section take up available space */
+    }
+
+    #emergencyBtn {
+        margin-top: 20px; /* Reset margin for larger screens */
+        margin-left: 0; /* Reset margin for larger screens */
+    }
+}
+
+#emergencyBtn{
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+
+}
+
+
+
+
+    </style>
+</head>
+<body>
+<h1>Outside the Door</h1>
+<br>
+    <div class="container">
+        <div class="login">
+            <h2>Login</h2>
+            <form id="loginForm" action="/login" method="POST">
+                <div class="form-group">
+                    <label for="code">10-digit RSIV Code:</label>
+                    <input type="text" id="code" name="code" required>
+                </div>
+                <button type="submit" id="submitButton" style="display:none;">Login</button>
+            </form>
+            
+        </div>
+        <div class="fingerprint">
+<!--            <h2>Fingerprint</h2>-->
+<!--            <button id="captureFingerprintBtn">Capture Fingerprint</button>-->
+            <passage-auth app-id="UxvOIkH0YSPM53tcoc5Isadk"></passage-auth>
+                <script src="https://psg.so/web.js"></script>
+        </div>
+    </div>
+    <form id="emergencyForm" method="POST" action="/send_whatsapp">
+        <input type="hidden" name="message" value="It's an emergency! Please visit here immediately.">
+        <input type="hidden" name="to_number" value="+918169861810">
+        <button type="submit" id="emergencyBtn">Emergency</button>
+    </form>
+    
+
+
+    <script>
+document.addEventListener("DOMContentLoaded", async function() {
+    // Get the input element
+    var codeInput = document.getElementById("code");
+    codeInput.focus()
+    var submitButton = document.getElementById("submitButton");
+
+    // Add event listener to detect input changes
+    codeInput.addEventListener("input", async function(event) {
+        // Check if input value length is equal to 10
+        if (codeInput.value.length === 10) {
+            // Check if the entered code exists in the RFID list
+            var enteredCode = codeInput.value;
+            var existsInRFIDList = rfidList.includes(enteredCode);
+
+            if (existsInRFIDList) {
+                // Redirect to yes.html if the code exists in the RFID list
+                await saveToLogsCollection(enteredCode);
+                window.location.href = "yes";
+            } else {
+                // Redirect to no.html if the code does not exist in the RFID list
+                await saveToLogsCollection(enteredCode);
+                window.location.href = "no";
+            }
+
+            // Save the RFID code and name to Firestore in the "logs" collection
+        }
+    });
+    codeInput.focus()
+
+});
+
+async function saveToLogsCollection(code) {
+    try {
+        // Get a reference to the Firestore collection "logs"
+        var logsCollection = db.collection("logs");
+
+        // Get current date and time
+        var currentDate = new Date();
+
+        // Format date as mm-dd-yyyy
+        var formattedDate = (currentDate.getMonth() + 1).toString().padStart(2, '0') + "-" + currentDate.getDate().toString().padStart(2, '0') + "-" + currentDate.getFullYear();
+
+        // Format time as 09:30
+        var formattedTime = currentDate.getHours().toString().padStart(2, '0') + ":" + currentDate.getMinutes().toString().padStart(2, '0');
+
+        // Find the name for the RFID code from dataSaved, or set default to "unknown"
+        var name = "unknown";
+        const foundData = dataSaved.find(item => item.rfid == code);
+        if (foundData) {
+            name = foundData.name;
+        }
+
+        // Add a new document with the RFID code, name, date, and time to the "logs" collection
+        const docRef = await logsCollection.add({
+            rfid: code,
+            name: name,
+            date: formattedDate,
+            time: formattedTime
+        });
+        
+        console.log("Document written with ID: ", docRef.id);
+    } catch (error) {
+        console.error("Error adding document: ", error);
+    }
+}
+
+
+
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const captureFingerprintBtn = document.getElementById('captureFingerprintBtn');
+
+            captureFingerprintBtn.addEventListener('click', function () {
+                // Check if Web Authentication API is supported
+                if (window.PublicKeyCredential) {
+                    navigator.credentials.create({
+                        publicKey: {
+                            // Specify Windows Hello as the authenticator
+                            authenticatorSelection: {
+                                authenticatorAttachment: 'platform',
+                                requireResidentKey: false,
+                                userVerification: 'required'
+                            },
+                            // Specify the challenge for the authentication
+                            challenge: new Uint8Array(32),
+                            // Specify the user information
+                            user: {
+                                id: new Uint8Array(32), // You can generate this or leave it empty
+                                name: 'user@example.com',
+                                displayName: 'User'
+                            },
+                            // Allow PIN as the authentication method
+                            pubKeyCredParams: [
+                                {
+                                    type: 'public-key',
+                                    alg: -7 // RS256
+                                }
+                            ],
+                            // Specify timeout for the operation
+                            timeout: 60000 // 60 seconds
+                        }
+                    }).then(function (credential) {
+                        // Handle successful authentication
+                        console.log('Successfully authenticated:', credential);
+                        // You can send this credential to your backend for verification
+                    }).catch(function (error) {
+                        // Handle errors
+                        console.error('Error during authentication:', error);
+                    });
+                } else {
+                    alert('Web Authentication API is not supported.');
+                }
+            });
+        });
+
+
+        
+        
+    </script>
+     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+     <script>
+         // Your Firebase configuration
+         const firebaseConfig = {
+             apiKey: "AIzaSyDPk9asfwCg3XWJPor5t5ED05N0Qsy_ppI",
+            authDomain: "users-d12a1.firebaseapp.com",
+            projectId: "users-d12a1",
+            storageBucket: "users-d12a1.appspot.com",
+            messagingSenderId: "595670645943",
+            appId: "1:595670645943:web:c12676644e8b5488eaa132"
+         };
+ 
+         // Initialize Firebase
+         firebase.initializeApp(firebaseConfig);
+ 
+         // Get a reference to the Firestore service
+         const db = firebase.firestore();
+
+        //  function sendRFIDListToFlask(rfidList) {
+        //         var xhr = new XMLHttpRequest();
+        //         xhr.open("POST", "/receive_rfid_list", true);
+        //         xhr.setRequestHeader("Content-Type", "application/json");
+        //         xhr.onreadystatechange = function() {
+        //             if (xhr.readyState === 4 && xhr.status === 200) {
+        //                 console.log("RFID List sent to Flask successfully.");
+        //             }
+        //         };
+        //         xhr.send(JSON.stringify(rfidList));
+        //     }
+ 
+         // Function to display entries
+         let rfidList = [];
+         let rfidNameList = [];
+         
+         function displayEntries() {
+             db.collection('entries').get().then(function(querySnapshot) {
+                
+                 querySnapshot.forEach(function(doc) {
+                     let entry = doc.data();
+                     rfidList.push(entry.rfid);
+                 });
+                 console.log("RFID List:", rfidList);
+                //  sendRFIDListToFlask(rfidList);     
+             });
+         }
+ 
+         // Initial display of entries when page loads
+         displayEntries();
+
+         let dataSaved = []
+         async function fetchDataFromDatabase() {
+            try {
+                const querySnapshot = await db.collection('entries').get();
+                const data = [];
+                querySnapshot.forEach(doc => {
+                    data.push({ id: doc.id, ...doc.data() });
+                });
+                return data;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                throw error; // You may handle errors according to your application's logic
+            }
+        }
+
+        fetchDataFromDatabase()
+            .then(data => {
+                dataSaved =data
+                console.log('Data from the database:', data);
+                // Process the data further or use it as needed
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Handle errors appropriately
+            });
+
+     </script>
+</body>
+</html>

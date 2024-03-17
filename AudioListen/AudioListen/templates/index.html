@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech-to-Text</title>
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js"></script>
+    <!-- Initialize Firebase -->
+    <script>
+        // Your web app's Firebase configuration
+         const firebaseConfig = {
+            apiKey: "AIzaSyDPk9asfwCg3XWJPor5t5ED05N0Qsy_ppI",
+            authDomain: "users-d12a1.firebaseapp.com",
+            projectId: "users-d12a1",
+            storageBucket: "users-d12a1.appspot.com",
+            messagingSenderId: "595670645943",
+            appId: "1:595670645943:web:c12676644e8b5488eaa132"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Initialize Firestore
+        const db = firebase.firestore();
+    </script>
+</head>
+<body>
+    <button onclick="startRecording()">Start Recording</button>
+    <button onclick="stopRecording()">Stop Recording</button>
+
+    <script>
+        let recognition;
+        let text = "";
+
+        // Initialize SpeechRecognition
+        function initializeRecognition() {
+            recognition = new window.SpeechRecognition();
+            recognition.continuous = true;
+            recognition.lang = 'en-US';
+            recognition.onresult = function(event) {
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    text += event.results[i][0].transcript;
+                }
+            };
+        }
+
+        function startRecording() {
+            initializeRecognition();
+            text = "";
+            recognition.start();
+            console.log("Recording started...");
+        }
+
+        function stopRecording() {
+            recognition.stop();
+            console.log("Recording stopped.");
+
+            // Store transcribed text in Firestore
+            storeTranscription(text);
+        }
+
+        function storeTranscription(transcription) {
+            db.collection("alerts").add({
+                alert: transcription
+            })
+            .then((docRef) => {
+                console.log("Transcription stored with ID: ", docRef.id);
+            })
+            .catch((error) => {
+                console.error("Error storing transcription: ", error);
+            });
+        }
+    </script>
+</body>
+</html>
